@@ -4,6 +4,7 @@ import os
 import cv2
 from tqdm import tqdm
 
+#Código Baseado em: https://pythonprogramming.net/loading-custom-data-deep-learning-python-tensorflow-keras/?completed=/introduction-deep-learning-python-tensorflow-keras/
 
 DATADIR = "/home/arthur/Documentos/database"
 

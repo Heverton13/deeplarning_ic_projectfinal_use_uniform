@@ -92,6 +92,16 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout, Activation, Flatten
 from tensorflow.keras.layers import Conv2D, MaxPooling2D
 
+import time
+from  tensorflow.keras.callbacks  import  TensorBoard
+import cv2
+
+NAME = "comfarda-vs-semfarda-CNN-64x2-{}".format(int(time.time()))
+tensorboard = TensorBoard(log_dir="logs\\{}".format(NAME))
+
+gpu_options=tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=0.333)
+sess=tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(gpu_options=gpu_options))
+
 pickle_in = open("X.pickle","rb")
 X = pickle.load(pickle_in)
 
@@ -122,5 +132,24 @@ model.compile(loss='binary_crossentropy',
               optimizer='adam',
               metrics=['accuracy'])
 
-model.fit(X, y, batch_size=32, epochs=3, validation_split=0.3)
+model.fit(X, y, batch_size=32, epochs=3, validation_split=0.3, callbacks=[tensorboard])
+model.save('64x3-CNN.model')
 
+CATEGORIES = ["comfarda","semfarda"]
+
+def prepare(filepath):
+    IMG_SIZE = 100
+    img_array = cv2.imread(filepath, cv2.IMREAD_GRAYSCALE)
+    img_array = img_array/255.0
+    new_array = cv2.resize(img_array, (IMG_SIZE, IMG_SIZE))
+    return new_array.reshape(-1, IMG_SIZE, IMG_SIZE, 1)
+
+
+model = tf.keras.models.load_model("64x3-CNN.model")
+
+prediction = model.predict([prepare('2.jpg')])
+print(prediction[0][0])  # will be a list in a list.
+print(CATEGORIES[int(prediction[0][0])])
+#Resultado: Err
+#0.69017106
+#comfarda
